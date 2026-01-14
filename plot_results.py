@@ -13,7 +13,7 @@ from plotnine import ggplot
 
 months = calendar.month_name[1:]  # Get a list of month names
 
-with open("ucaccmet2j_python/results.json") as file:
+with open("results.json") as file:
     results = json.load(file)
 
 # Check that actual data was found and loaded, and if not, terminate the script
