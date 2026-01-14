@@ -10,11 +10,10 @@ def get_data(station_code):
             station.append(dict)
 
     monthly_precipitation = {}
-    yearly_precipitation = {}
+    yearly_precipitation = 0
 
     for dict in station: 
         date = dict['date']
-        year = date.split('-')[0]
         month = date.split('-')[1]
         
         if month in monthly_precipitation:
@@ -22,24 +21,16 @@ def get_data(station_code):
         else:
             monthly_precipitation[month] = dict['value']
 
-        if year in yearly_precipitation:
-            yearly_precipitation[year] += dict['value']
-        else:
-            yearly_precipitation[year] = dict['value']
+        yearly_precipitation += dict['value']
 
-    total_monthly_percipitation = []
-    for key in monthly_precipitation:
-        total_monthly_percipitation.append(monthly_precipitation[key])
-
-    total_yearly_precipitation = []
-    for key in yearly_precipitation:
-        total_yearly_precipitation.append(yearly_precipitation[key])
+    total_monthly_percipitation = list(monthly_precipitation.values())
+    total_yearly_precipitation = yearly_precipitation
 
     relative_precipitation = []
-    for year in total_yearly_precipitation:
-        for month in total_monthly_percipitation:
-            relative_month = month / year
-            relative_precipitation.append(relative_month)
+    
+    for month in total_monthly_percipitation:
+        relative_month = month / total_yearly_precipitation
+        relative_precipitation.append(relative_month)
 
     return total_monthly_percipitation, total_yearly_precipitation, relative_precipitation
 
@@ -53,38 +44,49 @@ cincinnati_monthly, cincinnati_yearly, cincinnati_relative = get_data(cincinnati
 maui_monthly, maui_yearly, maui_relative = get_data(maui_code)
 san_diego_monthly, san_diego_yearly, san_diego_relative = get_data(san_diego_code)
 
+seatle_relative_yearly = seatle_yearly / (seatle_yearly + cincinnati_yearly + maui_yearly + san_diego_yearly)
+cincinnati_relative_yearly = cincinnati_yearly / (seatle_yearly + cincinnati_yearly + maui_yearly + san_diego_yearly)
+maui_relative_yearly = maui_yearly / (seatle_yearly + cincinnati_yearly + maui_yearly + san_diego_yearly)
+san_diego_relative_yearly = san_diego_yearly / (seatle_yearly + cincinnati_yearly + maui_yearly + san_diego_yearly)
+
 
 precipitation = {
-    'Seatle' : {
-        'station': 'GHCND:US1WAKG0038',
-        'sate': 'WA',
-        'total_monthly_precipitation': seatle_monthly,
-        'total_yearly_precipitation' : seatle_yearly,
-        'relative_monthtly_precipitation' : seatle_relative
-    },
     'Cincinnati': {
         'station': 'GHCND:USW00093814',
         'sate': 'OH',
         'total_monthly_precipitation': cincinnati_monthly,
         'total_yearly_precipitation' : cincinnati_yearly,
-        'relative_monthtly_precipitation' : cincinnati_relative
+        'relative_monthly_precipitation' : cincinnati_relative,
+        'relative_yearly_precipitation' : cincinnati_relative_yearly
+    },
+    'Seattle' : {
+        'station': 'GHCND:US1WAKG0038',
+        'sate': 'WA',
+        'total_monthly_precipitation': seatle_monthly,
+        'total_yearly_precipitation' : seatle_yearly,
+        'relative_monthly_precipitation' : seatle_relative,
+        'relative_yearly_precipitation' : seatle_relative_yearly
+
     },
     'Maui': {
         'station': 'GHCND:USC00513317',
         'sate': 'HI',
         'total_monthly_precipitation': maui_monthly,
         'total_yearly_precipitation' : maui_yearly,
-        'relative_monthtly_precipitation' : maui_relative
+        'relative_monthly_precipitation' : maui_relative,
+        'relative_yearly_precipitation' : maui_relative_yearly
+
     },
     'San Diego': {
         'station': 'GHCND:US1CASD0032',
         'sate': 'CA',
         'total_monthly_precipitation': san_diego_monthly,
         'total_yearly_precipitation' : san_diego_yearly,
-        'relative_monthtly_precipitation' : san_diego_relative
+        'relative_monthly_precipitation' : san_diego_relative,
+        'relative_yearly_precipitation' : san_diego_relative_yearly
+
     },
 }
 
-
-with open('ucaccmet2j_python/results_precipitation.json', 'w', encoding='utf-8') as file:
+with open('ucaccmet2j_python/results.json', 'w', encoding='utf-8') as file:
     json.dump(precipitation, file, indent=4)
